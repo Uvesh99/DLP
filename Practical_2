@@ -1,0 +1,113 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_STATES 100
+#define MAX_SYMBOLS 100
+
+// Define the finite automata structure
+typedef struct {
+    int states[MAX_STATES];
+    char symbols[MAX_SYMBOLS];
+    int transitions[MAX_STATES][MAX_SYMBOLS];
+    int start_state;
+    int accept_states[MAX_STATES];
+    int num_states;
+    int num_symbols;
+    int num_accept_states;
+} FiniteAutomata;
+
+// Function to find the index of a symbol
+int find_symbol_index(char symbols[], int num_symbols, char symbol) {
+    for (int i = 0; i < num_symbols; i++) {
+        if (symbols[i] == symbol) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Function to validate a string using the finite automata
+int validate_string(FiniteAutomata *fa, char *input_string) {
+    int current_state = fa->start_state;
+
+    for (int i = 0; i < strlen(input_string); i++) {
+        char symbol = input_string[i];
+        int symbol_index = find_symbol_index(fa->symbols, fa->num_symbols, symbol);
+
+        if (symbol_index == -1) {
+            return 0; // Invalid symbol
+        }
+
+        current_state = fa->transitions[current_state][symbol_index];
+    }
+
+    // Check if the current state is an accepting state
+    for (int i = 0; i < fa->num_accept_states; i++) {
+        if (fa->accept_states[i] == current_state) {
+            return 1; // Valid string
+        }
+    }
+
+    return 0; // Invalid string
+}
+
+int main() {
+    FiniteAutomata fa;
+
+    // Input number of symbols
+    printf("Enter the number of input symbols: ");
+    scanf("%d", &fa.num_symbols);
+    printf("Enter the input symbols (space-separated): ");
+    for (int i = 0; i < fa.num_symbols; i++) {
+        scanf(" %c", &fa.symbols[i]);
+    }
+
+    // Input number of states
+    printf("Enter the number of states: ");
+    scanf("%d", &fa.num_states);
+
+    // Input start state
+    printf("Enter the initial state: ");
+    scanf("%d", &fa.start_state);
+
+    // Input accepting states
+    printf("Enter the number of accepting states: ");
+    scanf("%d", &fa.num_accept_states);
+    printf("Enter the accepting states (space-separated): ");
+    for (int i = 0; i < fa.num_accept_states; i++) {
+        scanf("%d", &fa.accept_states[i]);
+    }
+
+    // Initialize transitions
+    for (int i = 0; i < fa.num_states; i++) {
+        for (int j = 0; j < fa.num_symbols; j++) {
+            fa.transitions[i][j] = -1;
+        }
+    }
+
+    // Input transitions
+    printf("Enter transitions in the format 'current_state symbol next_state':\n");
+    for (int i = 0; i < fa.num_states * fa.num_symbols; i++) {
+        int current_state, next_state;
+        char symbol;
+        scanf("%d %c %d", &current_state, &symbol, &next_state);
+        int symbol_index = find_symbol_index(fa.symbols, fa.num_symbols, symbol);
+        fa.transitions[current_state][symbol_index] = next_state;
+    }
+
+    // Input string to validate
+    char input_string[100];
+    printf("Enter the string to validate: ");
+    scanf("%s", input_string);
+
+    // Validate the string
+    if (validate_string(&fa, input_string)) {
+        printf("Valid String\n");
+    } else {
+        printf("Invalid String\n");
+    }
+
+    return 0;
+}
